@@ -1,5 +1,35 @@
 from typing import List
 
+# Function to compress the input text using LZW algorithm
+def lzw_compress(text: str) -> List[int]:
+    # Initialize the dictionary with ASCII characters
+    dictionary = {chr(i): i for i in range(256)}
+
+    result = []
+    current_sequence = ""
+
+    # Iterate through the input text
+    for char in text:
+        # Check if the current sequence with the new character exists in the dictionary
+        if current_sequence + char in dictionary:
+            # If it exists, update the current sequence
+            current_sequence += char
+        else:
+            # If it doesn't exist, add the current sequence to the result
+            result.append(dictionary[current_sequence])
+
+            # Add the new sequence to the dictionary
+            dictionary[current_sequence + char] = len(dictionary)
+
+            # Reset the current sequence to the new character
+            current_sequence = char
+
+    # Add the last sequence to the result
+    if current_sequence:
+        result.append(dictionary[current_sequence])
+
+    return result
+
 # Function to decompress the input data using LZW algorithm
 def lzw_decompress(compressed_data: List[int]) -> str:
     # Initialize the dictionary with ASCII characters
@@ -30,32 +60,3 @@ def lzw_decompress(compressed_data: List[int]) -> str:
         current_sequence = new_sequence
 
     return "".join(result)
-
-# Function to load the compressed data from a file
-def load_compressed_data(filename: str) -> List[int]:
-    compressed_data = []
-    with open(filename, "rb") as f:
-        while True:
-            code = f.read(2)
-            if not code:
-                break
-            compressed_data.append(int.from_bytes(code, byteorder="big"))
-    return compressed_data
-
-def decompress(file: str, output: str) -> None:
-    # Load the compressed data from a file
-    compressed_data = load_compressed_data(file)
-
-    # Decompress the input data
-    decompressed_text = lzw_decompress(compressed_data)
-
-    # Save the decompressed text to a file
-    with open(output, "w") as f:
-        f.write(decompressed_text)
-
-def test_loss(f1: str, f2: str) -> bool:
-    with open(f1, "r") as f:
-        f1_text = f.read()
-    with open(f2, "r") as f:
-        f2_text = f.read()
-    return f1_text == f2_text
