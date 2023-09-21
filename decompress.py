@@ -2,7 +2,7 @@
 from typing import List
 
 # Function to decompress the input data using LZW algorithm
-def lzw_decompress(compressed_data: List[int]) -> str:
+def lzw_decompression(compressed_data: List[int]) -> str:
     # Initialize the dictionary with ASCII characters
     dictionary = {i: chr(i) for i in range(256)}
 
@@ -32,6 +32,13 @@ def lzw_decompress(compressed_data: List[int]) -> str:
 
     return "".join(result)
 
+# Function to decompress the input text using the static dictionary
+def static_decompress(text: str) -> str:
+    decompressed_text = text
+    for word, code in static_dictionary.items():
+        decompressed_text = decompressed_text.replace(code, word)
+    return decompressed_text
+
 # Function to load the compressed data from a file
 def load_compressed_data(filename: str) -> List[int]:
     compressed_data = []
@@ -43,12 +50,12 @@ def load_compressed_data(filename: str) -> List[int]:
             compressed_data.append(int.from_bytes(code, byteorder="big"))
     return compressed_data
 
-def decompress(file: str, output: str) -> None:
+def lzw_decompress(file: str, output: str) -> None:
     # Load the compressed data from a file
     compressed_data = load_compressed_data(file)
 
     # Decompress the input data
-    decompressed_text = lzw_decompress(compressed_data)
+    decompressed_text = lzw_decompression(compressed_data)
 
     # Save the decompressed text to a file
     with open(output, "w") as f:

@@ -1,6 +1,101 @@
 import sys, os
 from typing import List
-from decompress import decompress, test_loss
+from decompress import lzw_decompress, test_loss, static_decompress
+
+# Add the static dictionary
+static_dictionary = {
+    "the": "á",
+    "and": "à",
+    "for": "ä",
+    "are": "ã",
+    "but": "å",
+    "not": "æ",
+    "you": "ç",
+    "all": "è",
+    "any": "é",
+    "can": "ê",
+    "her": "ë",
+    "was": "ì",
+    "one": "í",
+    "our": "î",
+    "out": "ï",
+    "day": "ð",
+    "get": "ñ",
+    "has": "ò",
+    "him": "ó",
+    "his": "ô",
+    "how": "õ",
+    "man": "ö",
+    "new": "ø",
+    "now": "ù",
+    "old": "ú",
+    "see": "û",
+    "two": "ü",
+    "way": "ý",
+    "who": "þ",
+    "boy": "ÿ",
+    "did": "Ā",
+    "its": "ā",
+    "let": "Ă",
+    "put": "ă",
+    "say": "Ą",
+    "she": "ą",
+    "too": "Ć",
+    "use": "ć",
+    "dad": "Ĉ",
+    "mom": "ĉ",
+    "that": "Ċ",
+    "with": "ċ",
+    "from": "Č",
+    "they": "č",
+    "this": "Ď",
+    "have": "ď",
+    "more": "Đ",
+    "will": "đ",
+    "your": "Ē",
+    "about": "ē",
+    "which": "Ĕ",
+    "when": "ĕ",
+    "there": "Ė",
+    "where": "ė",
+    "their": "Ę",
+    "would": "ę",
+    "these": "Ě",
+    "other": "ě",
+    "people": "Ĝ",
+    "after": "ĝ",
+    "first": "Ğ",
+    "think": "ğ",
+    "great": "Ġ",
+    "never": "ġ",
+    "little": "Ģ",
+    "might": "ģ",
+    "should": "Ĥ",
+    "could": "ĥ",
+    "going": "Ħ",
+    "house": "ħ",
+    "right": "Ĩ",
+    "something": "ĩ",
+    "things": "Ī",
+    "always": "ī",
+    "around": "Ĭ",
+    "because": "ĭ",
+    "before": "Į",
+    "better": "į",
+    "different": "İ",
+    "friends": "ı",
+    "school": "Ĳ",
+    "thought": "ĳ",
+    "together": "Ĵ",
+    "without": "ĵ",
+}
+
+# Function to compress the input text using the static dictionary
+def static_compress(text: str) -> str:
+    compressed_text = text
+    for word, code in static_dictionary.items():
+        compressed_text = compressed_text.replace(word, code)
+    return compressed_text
 
 # Function to compress the input text using LZW algorithm
 def lzw_compress(text: str) -> List[int]:
@@ -68,7 +163,7 @@ def process(file: str, compressed: str, decompressed: str, dev=False, ndigits=4)
     print("Percentage reduced: " + str(round((1-(end/start))*100, ndigits=ndigits)) + "%")
 
     # Run decompression
-    decompress(compressed, decompressed)
+    lzw_decompress(compressed, decompressed)
 
     if dev:
         print("Base and decompressed files are the same: " + str(test_loss(file, decompressed)))
