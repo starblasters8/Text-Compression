@@ -3,7 +3,7 @@ from typing import List
 from decompress import decompress, test_loss
 
 # Function to compress the input text using LZW algorithm
-def compress(text: str) -> List[int]:
+def lzw_compress(text: str) -> List[int]:
     # Initialize the dictionary with ASCII characters
     dictionary = {chr(i): i for i in range(256)}
 
@@ -38,24 +38,40 @@ def save_compressed_data(filename: str, compressed_data: List[int]) -> None:
         for code in compressed_data:
             f.write(code.to_bytes(2, byteorder="big"))
 
-def process(file: str, compressed: str, decompressed: str, dev=False) -> None:
+def check_text(text: str) -> str:
+    output = ""
+    for char in text:
+        if 0 <= ord(char) <= 127:
+            output += char
+        else:
+            print("Error, non unicode character found. Skipping character...")
+
+    return output
+
+def process(file: str, compressed: str, decompressed: str, dev=False, ndigits=4) -> None:
     with open(file, "r") as f:
         text = f.read()
 
-    compressed_data = compress(text)
+    text = check_text(text)
+
+    compressed_data = lzw_compress(text)
 
     # Save the compressed data to a file
     save_compressed_data(compressed, compressed_data)
 
-    print("Before compression: " + str(os.path.getsize(file)) + " bytes")
-    print("After compression: " + str(os.path.getsize(compressed)) + " bytes")
+    start = os.path.getsize(file)*8
+    end = os.path.getsize(compressed)*8
+
+    print("\nFile: " + file)
+    print("Before compression: " + str(start) + " bits")
+    print("After compression: " + str(end) + " bits")
+    print("Percentage reduced: " + str(round((1-(end/start))*100, ndigits=ndigits)) + "%")
 
     # Run decompression
     decompress(compressed, decompressed)
 
     if dev:
         print("Base and decompressed files are the same: " + str(test_loss(file, decompressed)))
-
 
 def main():
     if len(sys.argv) == 1:
